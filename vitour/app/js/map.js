@@ -1,94 +1,32 @@
-if (document.getElementById('map')){
-    mapboxgl.accessToken = window.MAPBOX_ACCESS_TOKEN;
-        const map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/mapbox/light-v11',
-        center: [-0.108968,51.492933],
-        zoom: 14
-    });
-    
-    const geojson = {
-        type: 'FeatureCollection',
-        features: [
-            {
-            type: 'Feature',
-            geometry: {
-                type: 'Point',
-                coordinates: [-0.108968,51.492933]
-            }
-            }
-        ]
-        };
-    
-        for (const feature of geojson.features) {
-        // create a HTML element for each feature
-        const el = document.createElement('div');
-        el.className = 'marker';
-    
-        // make a marker for each feature and add to the map
-        new mapboxgl.Marker(el).setLngLat(feature.geometry.coordinates).addTo(map);
-    }
-}
+// Map containers read their position from data-lat / data-lng / data-zoom when present.
+(function () {
+    var DEFAULT_CENTER = [-0.108968, 51.492933];
+    var DEFAULT_ZOOM = 14;
 
-if (document.getElementById('map2')) {
-    mapboxgl.accessToken = window.MAPBOX_ACCESS_TOKEN;
-        const map2 = new mapboxgl.Map({
-        container: 'map2',
-        style: 'mapbox://styles/mapbox/light-v11',
-        center: [-0.108968,51.492933],
-        zoom: 14
-    });
-    
-    const geojson1 = {
-        type: 'FeatureCollection',
-        features: [
-            {
-            type: 'Feature',
-            geometry: {
-                type: 'Point',
-                coordinates: [-0.108968,51.492933]
-            }
-            }
-        ]
-        };
-    
-        for (const feature of geojson1.features) {
-        // create a HTML element for each feature
-        const el = document.createElement('div');
+    function initMap(id) {
+        var container = document.getElementById(id);
+        if (!container || typeof mapboxgl === 'undefined') {
+            return;
+        }
+
+        var lat = parseFloat(container.getAttribute('data-lat'));
+        var lng = parseFloat(container.getAttribute('data-lng'));
+        var zoom = parseFloat(container.getAttribute('data-zoom'));
+        var center = (isFinite(lat) && isFinite(lng)) ? [lng, lat] : DEFAULT_CENTER;
+
+        mapboxgl.accessToken = window.MAPBOX_ACCESS_TOKEN;
+
+        var map = new mapboxgl.Map({
+            container: id,
+            style: 'mapbox://styles/mapbox/light-v11',
+            center: center,
+            zoom: isFinite(zoom) ? zoom : DEFAULT_ZOOM
+        });
+
+        var el = document.createElement('div');
         el.className = 'marker';
-    
-        // make a marker for each feature and add to the map
-        new mapboxgl.Marker(el).setLngLat(feature.geometry.coordinates).addTo(map2);
+        new mapboxgl.Marker(el).setLngLat(center).addTo(map);
     }
-}
-if (document.getElementById('map3')) {
-    mapboxgl.accessToken = window.MAPBOX_ACCESS_TOKEN;
-        const map3 = new mapboxgl.Map({
-        container: 'map3',
-        style: 'mapbox://styles/mapbox/light-v11',
-        center: [-0.108968,51.492933],
-        zoom: 14
-    });
-    
-    const geojson2 = {
-        type: 'FeatureCollection',
-        features: [
-            {
-            type: 'Feature',
-            geometry: {
-                type: 'Point',
-                coordinates: [-0.108968,51.492933]
-            }
-            }
-        ]
-        };
-    
-        for (const feature of geojson2.features) {
-        // create a HTML element for each feature
-        const el = document.createElement('div');
-        el.className = 'marker';
-    
-        // make a marker for each feature and add to the map
-        new mapboxgl.Marker(el).setLngLat(feature.geometry.coordinates).addTo(map3);
-    }
-}
+
+    ['map', 'map2', 'map3'].forEach(initMap);
+})();
