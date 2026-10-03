@@ -4,7 +4,7 @@ Run from the repository root:
 
     python tools/build_tours.py
 
-Writes static HTML into `vitour/` using the existing ViTour markup and CSS,
+Writes static HTML into `pathika/` using the existing Pathika markup and CSS,
 and refreshes the "Tours" dropdown in the shared navigation of every page.
 """
 
@@ -31,7 +31,7 @@ from tours_data import (
 )
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT_DIR = ROOT / "vitour"
+OUT_DIR = ROOT / "pathika"
 
 HUB_PAGE = "tours.html"
 WHATSAPP_URL = f"https://wa.me/{CONTACT['phone_intl']}"

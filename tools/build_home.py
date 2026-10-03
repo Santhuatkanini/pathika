@@ -4,7 +4,7 @@ Run from the repository root:
 
     python tools/build_home.py
 
-Patches `vitour/index.html` in place: hero slider, search form options,
+Patches `pathika/index.html` in place: hero slider, search form options,
 about section copy, the featured tour tabs, the counters and the destination
 grid. Everything else in the template page is left untouched. Idempotent.
 """
@@ -17,7 +17,7 @@ from pathlib import Path
 from tours_data import CATEGORIES, CONTACT, TOURS
 
 ROOT = Path(__file__).resolve().parent.parent
-INDEX = ROOT / "vitour" / "index.html"
+INDEX = ROOT / "pathika" / "index.html"
 
 HUB_PAGE = "tours.html"
 WHATSAPP_URL = f"https://wa.me/{CONTACT['phone_intl']}"
@@ -61,6 +61,24 @@ def find_section(html: str, opening: str) -> tuple[int, int]:
 def replace_section(html: str, opening: str, new_block: str) -> str:
     start, end = find_section(html, opening)
     return html[:start] + new_block + html[end:]
+
+
+def drop_block(html: str, marker: str) -> str:
+    """Delete a template block framed by a pair of identical `<!-- ... -->` comments.
+
+    No-op once the markers are gone, so the build stays idempotent.
+    """
+    start = html.find(marker)
+    end = html.rfind(marker)
+    if start == -1 or end == start:
+        return html
+    end += len(marker)
+    line_start = html.rfind("\n", 0, start) + 1
+    if not html[line_start:start].strip():
+        start = line_start
+    while html.startswith("\n", end):
+        end += 1
+    return html[:start] + html[end:]
 
 
 # --------------------------------------------------------------------------- slider
@@ -373,53 +391,6 @@ def patch_counters(html: str) -> str:
         flags=re.DOTALL,
     )
     return html[:start] + block + html[end:]
-
-
-# --------------------------------------------------------------------------- destinations
-
-DESTINATION_IMAGES = [
-    "./assets/images/destination/list.jpg",
-    "./assets/images/destination/list1.jpg",
-    "./assets/images/destination/list2.jpg",
-    "./assets/images/destination/list3.jpg",
-]
-
-
-def destination_section() -> str:
-    cards = []
-    for i, cat in enumerate(CATEGORIES):
-        count = len(tours_in(cat["slug"]))
-        cards.append(f"""                            <div class="tf-widget-destination wow fadeInUp animated" data-wow-delay="0.{i + 1}s">
-                                <a href="{cat['page']}" class="destination-imgae">
-                                    <span class="tour">{count} {'tour' if count == 1 else 'tours'}</span>
-                                    <img src="{DESTINATION_IMAGES[i % len(DESTINATION_IMAGES)]}" alt="{cat['name']}">
-                                </a>
-                                <div class="destination-content">
-                                    <span class="nation">{cat['name']}</span>
-                                    <div class="flex-two btn-destination">
-                                        <h6 class="title"><a href="{cat['page']}">View all tours</a></h6>
-                                        <a href="{cat['page']}" class="flex-five btn-view">
-                                            <i class="icon-Vector-32"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>""")
-
-    return f"""<section class="widget-destination">
-                    <div class="tf-container">
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <div class="center m0-auto w-text-heading mb-40">
-                                    <span class="sub-title-heading text-main mb-15 fadeInUp wow">Where we go</span>
-                                    <h2 class="title-heading fadeInUp wow">Four ways to travel with Pathika</h2>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="grid-three-destination">
-{chr(10).join(cards)}
-                        </div>
-                    </div>
-                </section>"""
 
 
 # --------------------------------------------------------------------------- offer package
@@ -818,7 +789,8 @@ def main() -> None:
     html = replace_section(html, '<section class="offer-package pd-main bg-1 relative">',
                            offer_package_section())
     html = patch_counters(html)
-    html = replace_section(html, '<section class="widget-destination">', destination_section())
+    html = drop_block(html, "<!-- Widget destination -->")
+    html = drop_block(html, "<!-- Widget Brand logo -->")
     html = replace_section(html, '<section class="widget-adventure">', adventure_section())
     html = patch_testimonials(html)
     html = patch_banner_contact(html)
