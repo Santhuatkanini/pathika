@@ -85,16 +85,7 @@ def nav(active: str) -> str:
     """`active` is "tours" or "" and controls the highlighted top-level item."""
     tours_class = "dropdown2 current" if active == "tours" else "dropdown2"
     return f"""<ul class="navigation clearfix">
-    <li class="dropdown2">
-        <a href="#">Home</a>
-        <ul>
-            <li><a href="index.html">Home Page 01</a></li>
-            <li><a href="home2.html">Home Page 02</a></li>
-            <li><a href="home3.html">Home Page 03</a></li>
-            <li><a href="home4.html">Home Page 04</a></li>
-            <li><a href="home5.html">Home Page 05</a></li>
-        </ul>
-    </li>
+    <li><a href="index.html">Home</a></li>
     <li class="{tours_class}">
         <a href="{HUB_PAGE}">Tours</a>
         {TOURS_SUBMENU}
