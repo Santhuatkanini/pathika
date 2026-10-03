@@ -63,24 +63,6 @@ def replace_section(html: str, opening: str, new_block: str) -> str:
     return html[:start] + new_block + html[end:]
 
 
-def drop_block(html: str, marker: str) -> str:
-    """Delete a template block framed by a pair of identical `<!-- ... -->` comments.
-
-    No-op once the markers are gone, so the build stays idempotent.
-    """
-    start = html.find(marker)
-    end = html.rfind(marker)
-    if start == -1 or end == start:
-        return html
-    end += len(marker)
-    line_start = html.rfind("\n", 0, start) + 1
-    if not html[line_start:start].strip():
-        start = line_start
-    while html.startswith("\n", end):
-        end += 1
-    return html[:start] + html[end:]
-
-
 # --------------------------------------------------------------------------- slider
 
 SLIDES = [
@@ -393,6 +375,53 @@ def patch_counters(html: str) -> str:
     return html[:start] + block + html[end:]
 
 
+# --------------------------------------------------------------------------- destinations
+
+DESTINATION_IMAGES = [
+    "./assets/images/destination/list.jpg",
+    "./assets/images/destination/list1.jpg",
+    "./assets/images/destination/list2.jpg",
+    "./assets/images/destination/list3.jpg",
+]
+
+
+def destination_section() -> str:
+    cards = []
+    for i, cat in enumerate(CATEGORIES):
+        count = len(tours_in(cat["slug"]))
+        cards.append(f"""                            <div class="tf-widget-destination wow fadeInUp animated" data-wow-delay="0.{i + 1}s">
+                                <a href="{cat['page']}" class="destination-imgae">
+                                    <span class="tour">{count} {'tour' if count == 1 else 'tours'}</span>
+                                    <img src="{DESTINATION_IMAGES[i % len(DESTINATION_IMAGES)]}" alt="{cat['name']}">
+                                </a>
+                                <div class="destination-content">
+                                    <span class="nation">{cat['name']}</span>
+                                    <div class="flex-two btn-destination">
+                                        <h6 class="title"><a href="{cat['page']}">View all tours</a></h6>
+                                        <a href="{cat['page']}" class="flex-five btn-view">
+                                            <i class="icon-Vector-32"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>""")
+
+    return f"""<section class="widget-destination">
+                    <div class="tf-container">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="center m0-auto w-text-heading mb-40">
+                                    <span class="sub-title-heading text-main mb-15 fadeInUp wow">Where we go</span>
+                                    <h2 class="title-heading fadeInUp wow">Four ways to travel with Pathika</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid-three-destination">
+{chr(10).join(cards)}
+                        </div>
+                    </div>
+                </section>"""
+
+
 # --------------------------------------------------------------------------- offer package
 
 FEATURED = ["kodachadri", "kudremukha", "gokarna", "bandajje", "netrani",
@@ -556,7 +585,7 @@ VALUES = [
         "slug": "pace",
         "tab": "Your own pace",
         "icon": "icon-Group-4",
-        "image": "./assets/images/page/1.jpg",
+        "image": "./assets/images/page/feature.jpg",
         "eyebrow": "Why Pathika",
         "title": "You are not sheep, and we are not shepherds",
         "points": [("icon-Page-1", "Room to roam"),
@@ -566,7 +595,7 @@ VALUES = [
         "slug": "everyone",
         "tab": "Everyone is welcome",
         "icon": "icon-Group-22",
-        "image": "./assets/images/page/2.jpg",
+        "image": "./assets/images/page/stand-for.jpg",
         "eyebrow": "Seven years in",
         "title": "Solo, with friends, or the whole family",
         "points": [("icon-Page-1", "Inclusive by default"),
@@ -576,7 +605,7 @@ VALUES = [
         "slug": "safety",
         "tab": "Safety first",
         "icon": "icon-Group-31",
-        "image": "./assets/images/page/3.jpg",
+        "image": "./assets/images/page/feature.jpg",
         "eyebrow": "Our top priority",
         "title": "A trip captain who knows the route and the weather",
         "points": [("icon-Page-1", "Basic first aid on every trip"),
@@ -586,7 +615,7 @@ VALUES = [
         "slug": "trace",
         "tab": "Leave no trace",
         "icon": "icon-deer-1",
-        "image": "./assets/images/page/1.jpg",
+        "image": "./assets/images/page/stand-for.jpg",
         "eyebrow": "Clean trails",
         "title": "Your trash comes back from the trail",
         "points": [("icon-Page-1", "No plastic packaging"),
@@ -596,7 +625,7 @@ VALUES = [
         "slug": "family",
         "tab": "Part of the family",
         "icon": "icon-adventure-1",
-        "image": "./assets/images/page/2.jpg",
+        "image": "./assets/images/page/feature.jpg",
         "eyebrow": "With Pathika as your host",
         "title": "You are not just a traveller",
         "points": [("icon-Page-1", "Campfire, games, travel diaries"),
@@ -621,32 +650,32 @@ def stand_for_section() -> str:
                                         </button>
                                     </li>""")
 
-        points = "\n".join(f"""                                                    <div class="flex-three text-white icon-list-wrap">
-                                                        <div class="icon">
+        points = "\n".join(f"""                                                    <li class="flex-three text-white icon-list-wrap">
+                                                        <span class="icon">
                                                             <i class="{icon}"></i>
-                                                        </div>
+                                                        </span>
                                                         <span class="icon-lists">{label}</span>
-                                                    </div>""" for icon, label in value["points"])
+                                                    </li>""" for icon, label in value["points"])
 
         panes.append(f"""                                    <div class="tab-pane fade{" show active" if first else ""}" id="stand-{value['slug']}-pane"
                                         role="tabpanel" aria-labelledby="stand-{value['slug']}-tab" tabindex="0">
-                                        <div class="tabs-activities-content flex">
+                                        <div class="tabs-activities-content">
                                             <div class="activities-image">
-                                                <img src="{value['image']}" alt="{value['tab']}">
+                                                <img src="{value['image']}" alt="{value['tab']}" loading="lazy">
                                             </div>
                                             <div class="activities-content relative">
                                                 <span class="sub-title text-white">{value['eyebrow']}</span>
-                                                <h3 class="title-activitis text-white mb-60">{value['title']}</h3>
-                                                <div class="flex-three mb-30">
+                                                <h3 class="title-activitis text-white">{value['title']}</h3>
+                                                <ul class="activities-points">
 {points}
-                                                </div>
+                                                </ul>
                                                 <div class="flex-three btn-wrap-activitis">
                                                     <a href="{HUB_PAGE}" class="icon-activitis flex-five">
                                                         <i class="icon-Vector-21"></i>
                                                     </a>
                                                     <a href="about-us.html" class="text-white get-start">See how we travel</a>
                                                 </div>
-                                                <img src="./assets/images/page/mask-tap.png" alt="image" class="mask-tab">
+                                                <img src="./assets/images/page/mask-tap.png" alt="" class="mask-tab">
                                             </div>
                                         </div>
                                     </div>""")
@@ -789,8 +818,6 @@ def main() -> None:
     html = replace_section(html, '<section class="offer-package pd-main bg-1 relative">',
                            offer_package_section())
     html = patch_counters(html)
-    html = drop_block(html, "<!-- Widget destination -->")
-    html = drop_block(html, "<!-- Widget Brand logo -->")
     html = replace_section(html, '<section class="widget-adventure">', adventure_section())
     html = patch_testimonials(html)
     html = patch_banner_contact(html)
