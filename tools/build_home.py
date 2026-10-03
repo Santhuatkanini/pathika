@@ -14,7 +14,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from tours_data import CATEGORIES, CONTACT, TOURS
+from tours_data import CATEGORIES, CONTACT, TOURS, photo
 
 ROOT = Path(__file__).resolve().parent.parent
 INDEX = ROOT / "pathika" / "index.html"
@@ -633,6 +633,9 @@ VALUES = [
     },
 ]
 
+for _value in VALUES:
+    _value["image"] = photo(f"stand-{_value['slug']}", _value["image"])
+
 
 def stand_for_section() -> str:
     tabs, panes = [], []
@@ -663,7 +666,7 @@ def stand_for_section() -> str:
                                             <div class="activities-image">
                                                 <img src="{value['image']}" alt="{value['tab']}" loading="lazy">
                                             </div>
-                                            <div class="activities-content relative">
+                                            <div class="activities-content">
                                                 <span class="sub-title text-white">{value['eyebrow']}</span>
                                                 <h3 class="title-activitis text-white">{value['title']}</h3>
                                                 <ul class="activities-points">
@@ -675,8 +678,8 @@ def stand_for_section() -> str:
                                                     </a>
                                                     <a href="about-us.html" class="text-white get-start">See how we travel</a>
                                                 </div>
-                                                <img src="./assets/images/page/mask-tap.png" alt="" class="mask-tab">
                                             </div>
+                                            <img src="./assets/images/page/mask-tap.png" alt="" class="mask-tab">
                                         </div>
                                     </div>""")
 

@@ -292,15 +292,16 @@ def header_html() -> str:
 """
 
 
-def breadcrumb(title: str, trail) -> str:
+def breadcrumb(title: str, trail, banner: str = None) -> str:
     items = "".join(
         f'\n                                    <li><a href="{href}">{label}</a></li>'
         if href else
         f'\n                                    <li><span>{label}</span></li>'
         for label, href in trail
     )
+    style = f' style="background-image: url({banner});"' if banner else ""
     return f"""
-                <section class="breadcumb-section">
+                <section class="breadcumb-section"{style}>
                     <div class="tf-container">
                         <div class="row">
                             <div class="col-lg-12 center z-index1">
@@ -920,13 +921,11 @@ def policies_tab(tour: dict) -> str:
 
 
 def gallery_tab(tour: dict) -> str:
-    images = [f"./assets/images/gallery/gallery{n}.jpg" if n else "./assets/images/gallery/gallery.jpg"
-              for n in ["", 2, 3, 4, 5, 6]]
     blocks = "\n\n".join(
         f"""                                                    <div class="image-gallery{i} image">
                                                         <img src="{src}" alt="{tour['name']}" class="item{1 if i % 2 else 2}">
                                                     </div>"""
-        for i, src in enumerate(images, start=1)
+        for i, src in enumerate(tour["gallery_tab"], start=1)
     )
     return f"""                                    <div class="tab-pane fade" id="pills-gallery" role="tabpanel"
                                         aria-labelledby="pills-gallery-tab" tabindex="0">
@@ -988,7 +987,7 @@ def render_detail(tour: dict) -> str:
             ("Tours", HUB_PAGE),
             (cat["name"], cat["page"]),
             (tour["name"], None),
-        ])
+        ], tour["banner"])
         + f"""
                 <section class="tour-single pd-main">
                     <div class="tf-container">
@@ -1030,7 +1029,7 @@ def render_category(cat: dict) -> str:
             ("Home", "index.html"),
             ("Tours", HUB_PAGE),
             (cat["name"], None),
-        ])
+        ], cat["banner"])
         + f"""
                 <section class="archieve-tour pd-main">
                     <div class="tf-container">
@@ -1178,6 +1177,43 @@ def patch_contact_details() -> int:
     return patched
 
 
+# --------------------------------------------------------------------------- gallery page
+
+GALLERY_TILE_RE = re.compile(
+    r'(<div class="tf-gallery">\s*<img src=")[^"]+("[^>]*>\s*<a href=")[^"]+'
+    r'("[^>]*>.*?<h4 class="gallery-title text-white mb-10">)[^<]+'
+    r'(</h4>\s*<p class="sub-title">)[^<]+',
+    re.DOTALL,
+)
+
+GALLERY_PAGE_TOURS = ["kodachadri", "gokarna", "dudhsagar", "kudremukha", "netrani", "spiti"]
+
+
+def patch_gallery_page() -> bool:
+    """Show real trips on gallery.html instead of the template's 'Discovery Island' tiles."""
+    path = OUT_DIR / "gallery.html"
+    if not path.is_file():
+        return False
+
+    picks = [t for slug in GALLERY_PAGE_TOURS for t in TOURS if t["slug"] == slug]
+    tiles = iter(picks)
+
+    def swap(match: re.Match) -> str:
+        tour = next(tiles, None)
+        if tour is None:
+            return match.group(0)
+        cat = CATEGORY_BY_SLUG[tour["category"]]
+        return (f'{match.group(1)}{tour["image"]}{match.group(2)}{tour["image"]}'
+                f'{match.group(3)}{tour["heading"]}{match.group(4)}{cat["name"]}')
+
+    original = path.read_text(encoding="utf-8")
+    updated = GALLERY_TILE_RE.sub(swap, original)
+    if updated == original:
+        return False
+    path.write_text(updated, encoding="utf-8")
+    return True
+
+
 # --------------------------------------------------------------------------- main
 
 def main() -> None:
@@ -1198,12 +1234,14 @@ def main() -> None:
 
     patched = patch_existing_nav()
     contacts = patch_contact_details()
+    gallery = patch_gallery_page()
 
     print(f"Wrote {len(written)} pages into {OUT_DIR}:")
     for name in written:
         print(f"  {name}")
     print(f"Patched the Tours dropdown in {patched} existing pages.")
     print(f"Patched contact details in {contacts} existing pages.")
+    print(f"Patched gallery.html: {gallery}")
 
 
 if __name__ == "__main__":

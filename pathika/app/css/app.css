@@ -2402,6 +2402,7 @@
   animation: toRightFromLeft 15s infinite;
 }
 .tf-widget-activities .tabs-activities-content {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(260px, 32%) minmax(0, 1fr);
   align-items: stretch;
@@ -2410,6 +2411,15 @@
   border-radius: 16px;
   padding: 16px;
   overflow: hidden;
+}
+.tf-widget-activities .tabs-activities-content .mask-tab {
+  position: absolute;
+  width: 140px;
+  height: auto;
+  right: 40px;
+  top: 40px;
+  opacity: 0.45;
+  pointer-events: none;
 }
 .tf-widget-activities .tabs-activities-content .activities-image {
   border-radius: 12px;
@@ -2487,16 +2497,6 @@
   font-size: 18px;
   font-weight: 500;
   line-height: 25px;
-}
-.tf-widget-activities .tabs-activities-content .activities-content .mask-tab {
-  position: absolute;
-  width: 150px;
-  height: auto;
-  right: -190px;
-  top: 50%;
-  transform: translateY(-50%);
-  opacity: 0.55;
-  pointer-events: none;
 }
 
 .our-activities {
@@ -10474,7 +10474,7 @@ body .dribbble img {
   .swiper-button-prev {
     display: none;
   }
-  .tf-widget-activities .tabs-activities-content .activities-content .mask-tab {
+  .tf-widget-activities .tabs-activities-content .mask-tab {
     display: none;
   }
   .tf-widget-activities .tabs-activities-content .activities-content {

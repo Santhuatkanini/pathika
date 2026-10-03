@@ -2,7 +2,25 @@
 
 Source of truth: the itinerary PDFs under `itineraries/`. Fixed departure dates
 from those PDFs are deliberately omitted — batches are published separately.
+
+Photos: drop your own files into `pathika/assets/images/tours/` and they are
+picked up automatically on the next build (see `photo()` and `_resolve_photos()`
+at the bottom of this file). Anything you have not supplied keeps the ViTour
+stock image, so the site never ends up with broken images.
 """
+
+from pathlib import Path
+
+PHOTO_DIR = Path(__file__).resolve().parent.parent / "pathika" / "assets" / "images" / "tours"
+PHOTO_EXTS = (".jpg", ".jpeg", ".png", ".webp")
+
+
+def photo(name: str, fallback: str) -> str:
+    for ext in PHOTO_EXTS:
+        if (PHOTO_DIR / f"{name}{ext}").is_file():
+            return f"./assets/images/tours/{name}{ext}"
+    return fallback
+
 
 CONTACT = {
     "email": "pathikabackpacking@gmail.com",
@@ -1296,3 +1314,41 @@ TOURS = [
         ],
     },
 ]
+
+
+# --------------------------------------------------------------------------- photos
+
+BANNER_FALLBACK = "./assets/images/page/breakcrumb.jpg"
+
+GALLERY_TAB_FALLBACK = [
+    "./assets/images/gallery/gallery.jpg",
+    "./assets/images/gallery/gallery2.jpg",
+    "./assets/images/gallery/gallery3.jpg",
+    "./assets/images/gallery/gallery4.jpg",
+    "./assets/images/gallery/gallery5.jpg",
+    "./assets/images/gallery/gallery6.jpg",
+]
+
+
+def _resolve_photos() -> None:
+    for cat in CATEGORIES:
+        main = photo(cat["slug"], cat["image"])
+        cat["image"] = main
+        cat["banner"] = photo(f"{cat['slug']}-banner", _banner_default(main))
+
+    for tour in TOURS:
+        slug = tour["slug"]
+        main = photo(slug, tour["image"])
+        tour["image"] = main
+        tour["banner"] = photo(f"{slug}-banner", _banner_default(main))
+        tour["gallery"] = [photo(f"{slug}-{i}", src) for i, src in enumerate(tour["gallery"], start=1)]
+        tour["gallery_tab"] = [photo(f"{slug}-{i}", src)
+                               for i, src in enumerate(GALLERY_TAB_FALLBACK, start=1)]
+
+
+def _banner_default(main: str) -> str:
+    """Your own hero doubles as the banner; the stock card art is too small to stretch."""
+    return main if main.startswith("./assets/images/tours/") else BANNER_FALLBACK
+
+
+_resolve_photos()
