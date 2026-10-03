@@ -90,14 +90,6 @@ def nav(active: str) -> str:
         <a href="{HUB_PAGE}">Tours</a>
         {TOURS_SUBMENU}
     </li>
-    <li class="dropdown2"><a href="#">Destination</a>
-        <ul>
-            <li><a href="tour-destination-v1.html">Destination V1</a></li>
-            <li><a href="tour-destination-v2.html">Destination V2</a></li>
-            <li><a href="tour-destination-v3.html">Destination V3</a></li>
-            <li><a href="single-destination.html">Destination Single</a></li>
-        </ul>
-    </li>
     <li class="dropdown2"><a href="#">Blog</a>
         <ul>
             <li><a href="blog.html">Blog</a></li>
@@ -1177,6 +1169,29 @@ def patch_contact_details() -> int:
     return patched
 
 
+# --------------------------------------------------------------------------- destination nav
+
+DESTINATION_NAV_RE = re.compile(
+    r'\s*<li class="dropdown2[^"]*">\s*<a href="[^"]*">Destination</a>\s*<ul>.*?</ul>\s*</li>',
+    re.DOTALL,
+)
+
+
+def patch_remove_destination_nav() -> int:
+    """Strip the template's Destination dropdown from the pages we do not regenerate."""
+    generated = {detail_page(t) for t in TOURS} | {c["page"] for c in CATEGORIES} | {HUB_PAGE}
+    patched = 0
+    for path in sorted(OUT_DIR.glob("*.html")):
+        if path.name in generated:
+            continue
+        original = path.read_text(encoding="utf-8")
+        updated = DESTINATION_NAV_RE.sub("", original)
+        if updated != original:
+            path.write_text(updated, encoding="utf-8")
+            patched += 1
+    return patched
+
+
 # --------------------------------------------------------------------------- gallery page
 
 GALLERY_TILE_RE = re.compile(
@@ -1234,6 +1249,7 @@ def main() -> None:
 
     patched = patch_existing_nav()
     contacts = patch_contact_details()
+    destinations = patch_remove_destination_nav()
     gallery = patch_gallery_page()
 
     print(f"Wrote {len(written)} pages into {OUT_DIR}:")
@@ -1241,6 +1257,7 @@ def main() -> None:
         print(f"  {name}")
     print(f"Patched the Tours dropdown in {patched} existing pages.")
     print(f"Patched contact details in {contacts} existing pages.")
+    print(f"Removed the Destination nav from {destinations} existing pages.")
     print(f"Patched gallery.html: {gallery}")
 
 

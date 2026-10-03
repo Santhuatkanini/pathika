@@ -375,53 +375,6 @@ def patch_counters(html: str) -> str:
     return html[:start] + block + html[end:]
 
 
-# --------------------------------------------------------------------------- destinations
-
-DESTINATION_IMAGES = [
-    "./assets/images/destination/list.jpg",
-    "./assets/images/destination/list1.jpg",
-    "./assets/images/destination/list2.jpg",
-    "./assets/images/destination/list3.jpg",
-]
-
-
-def destination_section() -> str:
-    cards = []
-    for i, cat in enumerate(CATEGORIES):
-        count = len(tours_in(cat["slug"]))
-        cards.append(f"""                            <div class="tf-widget-destination wow fadeInUp animated" data-wow-delay="0.{i + 1}s">
-                                <a href="{cat['page']}" class="destination-imgae">
-                                    <span class="tour">{count} {'tour' if count == 1 else 'tours'}</span>
-                                    <img src="{DESTINATION_IMAGES[i % len(DESTINATION_IMAGES)]}" alt="{cat['name']}">
-                                </a>
-                                <div class="destination-content">
-                                    <span class="nation">{cat['name']}</span>
-                                    <div class="flex-two btn-destination">
-                                        <h6 class="title"><a href="{cat['page']}">View all tours</a></h6>
-                                        <a href="{cat['page']}" class="flex-five btn-view">
-                                            <i class="icon-Vector-32"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>""")
-
-    return f"""<section class="widget-destination">
-                    <div class="tf-container">
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <div class="center m0-auto w-text-heading mb-40">
-                                    <span class="sub-title-heading text-main mb-15 fadeInUp wow">Where we go</span>
-                                    <h2 class="title-heading fadeInUp wow">Four ways to travel with Pathika</h2>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="grid-three-destination">
-{chr(10).join(cards)}
-                        </div>
-                    </div>
-                </section>"""
-
-
 # --------------------------------------------------------------------------- offer package
 
 FEATURED = ["kodachadri", "kudremukha", "gokarna", "bandajje", "netrani",

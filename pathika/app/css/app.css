@@ -7051,6 +7051,10 @@
   height: auto;
 }
 
+.tab-tour-list .tab-content .row {
+  row-gap: 32px;
+}
+
 /* widget Counter
 -------------------------------------------------------------- */
 .tf-counter {
@@ -10816,9 +10820,6 @@ body .dribbble img {
   }
   .nav-tabs-activities .nav-item .nav-link {
     margin: 0;
-  }
-  .tab-tour-list .tour-listing {
-    margin-bottom: 30px;
   }
   .image-gallery-single img {
     height: 240px;
