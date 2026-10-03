@@ -1716,6 +1716,11 @@
 }
 .sidebar-widget .recent-post-list .list-recent .recent-image img {
   width: 102px;
+  height: 78px;
+  -o-object-fit: cover;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
 }
 .sidebar-widget .recent-post-list .list-recent .recent-info {
   padding-left: 24px;
@@ -3650,10 +3655,13 @@
 .listing-list-car-grid.listing-list-car-list .tour-listing {
   padding: 13px;
   display: flex;
+  flex-direction: row;
+  height: auto;
 }
 .listing-list-car-grid.listing-list-car-list .tour-listing .tour-listing-image {
   max-width: 258px;
   width: 100%;
+  aspect-ratio: auto;
   border-radius: 8px;
   overflow: hidden;
 }
@@ -4443,6 +4451,15 @@
 }
 .tour-single .gallery-content-tour .image-gallery6 {
   grid-area: image-gallery6;
+}
+
+.image-gallery-single img {
+  display: block;
+  width: 100%;
+  height: 340px;
+  -o-object-fit: cover;
+  object-fit: cover;
+  border-radius: 8px;
 }
 
 .discount-h5 {
@@ -6839,6 +6856,9 @@
   border-radius: 8px 8px 8px 8px;
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 .tour-listing:hover .tour-listing-image img {
   transform: scale(1.1);
@@ -6855,6 +6875,11 @@
 .tour-listing .tour-listing-image {
   position: relative;
   display: block;
+  aspect-ratio: 4 / 3;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 8px;
+  background-color: #EDEEEE;
 }
 .tour-listing .tour-listing-image .badge-top {
   position: absolute;
@@ -6896,6 +6921,11 @@
   margin-right: 5px;
 }
 .tour-listing .tour-listing-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  -o-object-fit: cover;
+  object-fit: cover;
   -webkit-transition: all 0.3s ease;
   -moz-transition: all 0.3s ease;
   -ms-transition: all 0.3s ease;
@@ -6903,11 +6933,14 @@
   transition: all 0.3s ease;
 }
 .tour-listing .tour-listing-content {
-  padding: 14px 40px 18px 29px;
+  padding: 14px 29px 18px 29px;
   background-color: #FFFFFF;
   border-radius: 8px;
   margin-top: -23px;
   position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
 }
 .tour-listing .tour-listing-content .tag-listing {
   font-size: 14px;
@@ -6933,6 +6966,10 @@
   margin-right: 10px;
   font-size: 12px;
 }
+.tour-listing .tour-listing-content .des {
+  flex: 1 1 auto;
+  margin-bottom: 16px;
+}
 .tour-listing .tour-listing-content .title-tour-list {
   font-size: 18px;
   line-height: 30px;
@@ -6955,6 +6992,7 @@
   padding-top: 20px;
   padding-bottom: 24px;
   border-bottom: 1px solid #EBEBEB;
+  margin-top: auto;
   margin-bottom: 12px;
   flex-wrap: wrap;
   gap: 18px;
@@ -7004,6 +7042,13 @@
 .tour-listing .tour-listing-content .icon-bookmark i {
   font-size: 20px;
   color: #4DA528;
+}
+
+.offer-package .swiper-wrapper {
+  align-items: stretch;
+}
+.offer-package .swiper-slide {
+  height: auto;
 }
 
 /* widget Counter
@@ -10770,10 +10815,13 @@ body .dribbble img {
     padding: 80px 0;
   }
   .nav-tabs-activities .nav-item .nav-link {
-    margin: 8px 8.5px;
+    margin: 0;
   }
   .tab-tour-list .tour-listing {
     margin-bottom: 30px;
+  }
+  .image-gallery-single img {
+    height: 240px;
   }
   .travel-video .mask-video {
     bottom: 7%;
@@ -11474,6 +11522,9 @@ body .dribbble img {
   }
   .image-gallery-single .col-sm-6 {
     margin-bottom: 30px;
+  }
+  .image-gallery-single img {
+    height: 170px;
   }
   .listing-list-car-grid {
     grid-template-columns: 1fr;
