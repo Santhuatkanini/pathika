@@ -90,21 +90,7 @@ def nav(active: str) -> str:
         <a href="{HUB_PAGE}">Tours</a>
         {TOURS_SUBMENU}
     </li>
-    <li class="dropdown2"><a href="#">Blog</a>
-        <ul>
-            <li><a href="blog.html">Blog</a></li>
-            <li><a href="blog-details.html">Blog Detail</a></li>
-        </ul>
-    </li>
-    <li class="dropdown2"><a href="#">Pages</a>
-        <ul>
-            <li><a href="about-us.html">About Us</a></li>
-            <li><a href="team.html">Team member</a></li>
-            <li><a href="gallery.html">Gallery</a></li>
-            <li><a href="terms-condition.html">Terms &amp; Condition</a></li>
-            <li><a href="help-center.html">Help center</a></li>
-        </ul>
-    </li>
+    <li><a href="blog.html">News</a></li>
     <li class="dropdown2"><a href="#">Dashboard</a>
         <ul>
             <li><a href="dashboard.html">Dashboard</a></li>
@@ -116,6 +102,15 @@ def nav(active: str) -> str:
         </ul>
     </li>
     <li><a href="contact-us.html">Contact</a></li>
+    <li class="dropdown2"><a href="#">More</a>
+        <ul>
+            <li><a href="about-us.html">About Us</a></li>
+            <li><a href="team.html">Team member</a></li>
+            <li><a href="gallery.html">Gallery</a></li>
+            <li><a href="terms-condition.html">Terms &amp; Condition</a></li>
+            <li><a href="help-center.html">Help center</a></li>
+        </ul>
+    </li>
 </ul>"""
 
 
@@ -1169,16 +1164,58 @@ def patch_contact_details() -> int:
     return patched
 
 
-# --------------------------------------------------------------------------- destination nav
+# --------------------------------------------------------------------------- shared nav fixes
 
 DESTINATION_NAV_RE = re.compile(
     r'\s*<li class="dropdown2[^"]*">\s*<a href="[^"]*">Destination</a>\s*<ul>.*?</ul>\s*</li>',
     re.DOTALL,
 )
 
+BLOG_NAV_RE = re.compile(
+    r'<li class="dropdown2([^"]*)">\s*<a href="[^"]*">Blog</a>\s*<ul>.*?</ul>\s*</li>',
+    re.DOTALL,
+)
 
-def patch_remove_destination_nav() -> int:
-    """Strip the template's Destination dropdown from the pages we do not regenerate."""
+
+def _news_item(match: re.Match) -> str:
+    current = ' class="current"' if "current" in match.group(1) else ""
+    return f'<li{current}><a href="blog.html">News</a></li>'
+
+
+PAGES_NAV_RE = re.compile(
+    r'[ \t]*<li class="dropdown2([^"]*)">\s*<a href="[^"]*">Pages</a>\s*(<ul>.*?</ul>)\s*</li>\n?',
+    re.DOTALL,
+)
+
+CONTACT_NAV_RE = re.compile(r'([ \t]*)(<li[^>]*><a href="contact-us\.html">Contact</a></li>)')
+
+# Fake language/currency switchers the generated pages never had.
+HEADER_SELECT_RE = re.compile(
+    r'[ \t]*<div class="(?:language|currency)">\s*<div class="nice-select".*?</div>\s*</div>[ \t]*\n?',
+    re.DOTALL,
+)
+
+
+def move_pages_to_end(page: str) -> str:
+    """Pull the Pages dropdown out of the middle of the nav and re-add it last as More."""
+    found = PAGES_NAV_RE.search(page)
+    if not found:
+        return page
+    classes, submenu = found.group(1), found.group(2)
+    page = page[:found.start()] + page[found.end():]
+
+    contact = CONTACT_NAV_RE.search(page)
+    if not contact:
+        return page
+    indent = contact.group(1)
+    more = (f'\n{indent}<li class="dropdown2{classes}"><a href="#">More</a>\n'
+            f'{indent}    {submenu}\n'
+            f'{indent}</li>')
+    return page[:contact.end()] + more + page[contact.end():]
+
+
+def patch_static_nav() -> int:
+    """Keep the pages we do not regenerate in step with nav()."""
     generated = {detail_page(t) for t in TOURS} | {c["page"] for c in CATEGORIES} | {HUB_PAGE}
     patched = 0
     for path in sorted(OUT_DIR.glob("*.html")):
@@ -1186,10 +1223,51 @@ def patch_remove_destination_nav() -> int:
             continue
         original = path.read_text(encoding="utf-8")
         updated = DESTINATION_NAV_RE.sub("", original)
+        updated = BLOG_NAV_RE.sub(_news_item, updated)
+        updated = HEADER_SELECT_RE.sub("", updated)
+        updated = move_pages_to_end(updated)
         if updated != original:
             path.write_text(updated, encoding="utf-8")
             patched += 1
     return patched
+
+
+# --------------------------------------------------------------------------- about page
+
+TOP_WEEK_RE = re.compile(
+    r'\n[ \t]*<!-- Widget Top this Week -->.*?<!-- Widget Top this Week -->', re.DOTALL)
+
+# The page shipped two identical call-to-action bands; keep only the closing one.
+DUPLICATE_CTA_RE = re.compile(r'\n[ \t]*<section class="mt--82\s*">.*?</section>\n', re.DOTALL)
+
+ABOUT_CTA_RE = re.compile(
+    r'(<h2 class="title-call">).*?(</h2>\s*<p class="des">).*?(</p>)', re.DOTALL)
+ABOUT_CTA_LINK_RE = re.compile(r'<a href="[^"]*" class="get-call"[^>]*>.*?</a>', re.DOTALL)
+
+
+def patch_about_page() -> bool:
+    """Drop the template's "Our top this week" slider of invented Moscow tours."""
+    path = OUT_DIR / "about-us.html"
+    if not path.is_file():
+        return False
+    original = path.read_text(encoding="utf-8")
+
+    updated = TOP_WEEK_RE.sub("", original, count=1)
+    updated = DUPLICATE_CTA_RE.sub("\n", updated, count=1)
+    # That -14em pulled the (now deleted) slider up over the video; it left the CTA floating.
+    updated = updated.replace("video-h4-widget relative overflow-hidden mb--14em",
+                              "video-h4-widget relative overflow-hidden")
+    updated = ABOUT_CTA_RE.sub(
+        f'\\g<1>Ready to adventure and enjoy nature?\\g<2>Message us on WhatsApp at '
+        f'{CONTACT["phone_display"]} to hold your slot.\\g<3>', updated, count=1)
+    updated = ABOUT_CTA_LINK_RE.sub(
+        f'<a href="https://wa.me/{CONTACT["phone_intl"]}" class="get-call" target="_blank" '
+        f'rel="noopener">Let\'s get started</a>', updated, count=1)
+
+    if updated == original:
+        return False
+    path.write_text(updated, encoding="utf-8")
+    return True
 
 
 # --------------------------------------------------------------------------- gallery page
@@ -1249,16 +1327,18 @@ def main() -> None:
 
     patched = patch_existing_nav()
     contacts = patch_contact_details()
-    destinations = patch_remove_destination_nav()
+    navs = patch_static_nav()
     gallery = patch_gallery_page()
+    about = patch_about_page()
 
     print(f"Wrote {len(written)} pages into {OUT_DIR}:")
     for name in written:
         print(f"  {name}")
     print(f"Patched the Tours dropdown in {patched} existing pages.")
     print(f"Patched contact details in {contacts} existing pages.")
-    print(f"Removed the Destination nav from {destinations} existing pages.")
+    print(f"Patched the shared nav in {navs} existing pages.")
     print(f"Patched gallery.html: {gallery}")
+    print(f"Patched about-us.html: {about}")
 
 
 if __name__ == "__main__":
