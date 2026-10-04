@@ -211,7 +211,7 @@ def header_html() -> str:
                                         <div class="logo-box">
                                             <div class="logo">
                                                 <a href="index.html">
-                                                    <img src="assets/images/logo.png" alt="Pathika">
+                                                    <img src="assets/images/logo2.png" alt="Pathika">
                                                 </a>
                                             </div>
                                         </div>
@@ -250,7 +250,6 @@ def header_html() -> str:
                                 </div>
                             </div>
                         </div>
-                        <img src="./assets/images/page/fl1.png" alt="" class="fly-ab">
                     </div>
                 </div>
 
@@ -1195,6 +1194,32 @@ HEADER_SELECT_RE = re.compile(
     re.DOTALL,
 )
 
+# Six repeats of the same placeholder logo, presented as partners.
+BRAND_LOGOS_RE = re.compile(
+    r'\s*<section class="brand-logo-widget[^"]*">.*?</section>', re.DOTALL)
+
+# The header is brand green now, so it needs the transparent white/yellow mark. The
+# off-canvas panel stays light and keeps logo.png, hence matching on the exact tag.
+HEADER_LOGO_OLD = '<img src="assets/images/logo.png" alt="Logo">'
+HEADER_LOGO_NEW = '<img src="assets/images/logo2.png" alt="Pathika">'
+
+# A stock airliner on a white background, wrong for a trekking brand and a white
+# rectangle now that the header is green.
+FLY_AB_RE = re.compile(r'\n[ \t]*<img src="[^"]*fl1\.png"[^>]*class="fly-ab">')
+
+CTA_RE = re.compile(
+    r'(<h2 class="title-call">).*?(</h2>\s*<p class="des">).*?(</p>)', re.DOTALL)
+CTA_LINK_RE = re.compile(r'<a href="[^"]*" class="get-call"[^>]*>.*?</a>', re.DOTALL)
+
+
+def fix_cta(page: str) -> str:
+    page = CTA_RE.sub(
+        f'\\g<1>Ready to adventure and enjoy nature?\\g<2>Message us on WhatsApp at '
+        f'{CONTACT["phone_display"]} to hold your slot.\\g<3>', page)
+    return CTA_LINK_RE.sub(
+        f'<a href="https://wa.me/{CONTACT["phone_intl"]}" class="get-call" target="_blank" '
+        f'rel="noopener">Let\'s get started</a>', page)
+
 
 def move_pages_to_end(page: str) -> str:
     """Pull the Pages dropdown out of the middle of the nav and re-add it last as More."""
@@ -1214,8 +1239,8 @@ def move_pages_to_end(page: str) -> str:
     return page[:contact.end()] + more + page[contact.end():]
 
 
-def patch_static_nav() -> int:
-    """Keep the pages we do not regenerate in step with nav()."""
+def patch_static_pages() -> int:
+    """Keep the pages we do not regenerate in step with nav() and header_html()."""
     generated = {detail_page(t) for t in TOURS} | {c["page"] for c in CATEGORIES} | {HUB_PAGE}
     patched = 0
     for path in sorted(OUT_DIR.glob("*.html")):
@@ -1225,6 +1250,10 @@ def patch_static_nav() -> int:
         updated = DESTINATION_NAV_RE.sub("", original)
         updated = BLOG_NAV_RE.sub(_news_item, updated)
         updated = HEADER_SELECT_RE.sub("", updated)
+        updated = BRAND_LOGOS_RE.sub("", updated)
+        updated = updated.replace(HEADER_LOGO_OLD, HEADER_LOGO_NEW)
+        updated = FLY_AB_RE.sub("", updated)
+        updated = fix_cta(updated)
         updated = move_pages_to_end(updated)
         if updated != original:
             path.write_text(updated, encoding="utf-8")
@@ -1240,10 +1269,6 @@ TOP_WEEK_RE = re.compile(
 # The page shipped two identical call-to-action bands; keep only the closing one.
 DUPLICATE_CTA_RE = re.compile(r'\n[ \t]*<section class="mt--82\s*">.*?</section>\n', re.DOTALL)
 
-ABOUT_CTA_RE = re.compile(
-    r'(<h2 class="title-call">).*?(</h2>\s*<p class="des">).*?(</p>)', re.DOTALL)
-ABOUT_CTA_LINK_RE = re.compile(r'<a href="[^"]*" class="get-call"[^>]*>.*?</a>', re.DOTALL)
-
 
 def patch_about_page() -> bool:
     """Drop the template's "Our top this week" slider of invented Moscow tours."""
@@ -1257,12 +1282,6 @@ def patch_about_page() -> bool:
     # That -14em pulled the (now deleted) slider up over the video; it left the CTA floating.
     updated = updated.replace("video-h4-widget relative overflow-hidden mb--14em",
                               "video-h4-widget relative overflow-hidden")
-    updated = ABOUT_CTA_RE.sub(
-        f'\\g<1>Ready to adventure and enjoy nature?\\g<2>Message us on WhatsApp at '
-        f'{CONTACT["phone_display"]} to hold your slot.\\g<3>', updated, count=1)
-    updated = ABOUT_CTA_LINK_RE.sub(
-        f'<a href="https://wa.me/{CONTACT["phone_intl"]}" class="get-call" target="_blank" '
-        f'rel="noopener">Let\'s get started</a>', updated, count=1)
 
     if updated == original:
         return False
@@ -1327,7 +1346,7 @@ def main() -> None:
 
     patched = patch_existing_nav()
     contacts = patch_contact_details()
-    navs = patch_static_nav()
+    navs = patch_static_pages()
     gallery = patch_gallery_page()
     about = patch_about_page()
 

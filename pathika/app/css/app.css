@@ -280,8 +280,9 @@
 .main-header .logo-box .logo img {
   display: inline-block;
   max-width: 100%;
-  width: 128px;
+  width: 152px;
   height: auto;
+  border-radius: 6px;
   -webkit-transition: all 300ms ease;
   -ms-transition: all 300ms ease;
   -o-transition: all 300ms ease;
@@ -1354,6 +1355,78 @@
   transform: translateX(-15px);
   transition-duration: 0.3s;
   opacity: 0;
+}
+
+/*----------------------pathika header--------------------*/
+/* Contour texture lifted from the logo artwork; brand green #006837, yellow #FFF100. */
+.main-header,
+.main-header .sticky-header {
+  background-color: #006837;
+  background-image: url(../../assets/images/page/header-contour.jpg);
+  background-size: 1200px auto;
+  background-position: center;
+  background-repeat: repeat;
+}
+.header-top {
+  background-color: rgba(0, 0, 0, 0.22);
+}
+.header-top .header-top-wrap .header-top-right ul li {
+  white-space: nowrap;
+}
+.header-top .header-top-wrap .header-top-right ul li:not(:last-child) {
+  margin-right: 26px;
+}
+.header-top .header-top-wrap .header-top-right ul li i,
+.header-top .header-top-wrap .header-top-left .booking i {
+  color: #FFF100;
+}
+.header-top .header-top-wrap .header-top-right ul li span,
+.header-top .header-top-wrap .header-top-left .booking span,
+.header-top .header-top-wrap .header-top-left .follow-social span {
+  color: #FFFFFF;
+}
+.header-top .header-top-wrap .header-top-left .follow-social ul {
+  background-color: rgba(255, 255, 255, 0.14);
+  border-radius: 4px;
+}
+.header-top .header-top-wrap .header-top-left .follow-social ul li a {
+  color: #FFFFFF;
+}
+.header-top .header-top-wrap .header-top-left .follow-social ul li a:hover,
+.header-top .header-top-wrap .header-top-left .booking:hover span {
+  color: #FFF100;
+}
+
+.main-header .main-menu .navigation > li > a {
+  color: #FFFFFF;
+}
+.main-header .main-menu .navigation > li:hover > a,
+.main-header .main-menu .navigation > li.current > a {
+  color: #FFF100;
+  opacity: 1;
+}
+
+.main-header .header-account ul li a,
+.main-header .header-account .search-mobie .show-search,
+.main-header .mobile-nav-toggler i {
+  color: #FFFFFF;
+}
+.main-header .header-account ul li a:hover,
+.main-header .header-account .search-mobie .show-search:hover {
+  color: #FFF100;
+}
+.main-header .header-account .register ul li a img {
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+/* JS adds .is-fixed.is-small to the header on scroll; the template makes it white. */
+.header-lower.is-fixed.is-small {
+  background-color: #006837;
+  background-image: url(../../assets/images/page/header-contour.jpg);
+  background-size: 1200px auto;
+  background-position: center;
+  background-repeat: repeat;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.18);
 }
 
 /*----------------------breadcumb--------------------*/
