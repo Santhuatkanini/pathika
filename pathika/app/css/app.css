@@ -2065,6 +2065,12 @@
 .inner-content-about .btn-wrap-about .profile .content img {
   width: auto;
 }
+.inner-content-about .btn-wrap-about .profile .content .name {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 26px;
+  color: #081E2A;
+}
 .inner-content-about .btn-wrap-about .profile .content span {
   display: block;
   font-size: 14px;
@@ -3984,6 +3990,9 @@
 }
 .login .login-wrap .image img {
   border-radius: 10px;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
 }
 .login .login-wrap .content {
   width: 100%;
@@ -4045,6 +4054,24 @@
 .login .login-wrap .content .input-wrap-social .login-social img {
   width: auto;
   margin-right: 12px;
+}
+button.login-social {
+  background-color: transparent;
+  font-family: inherit;
+  cursor: pointer;
+}
+.login .login-wrap .content .auth-message {
+  margin-bottom: 20px;
+  padding: 12px 15px;
+  border-radius: 6px;
+  font-size: 15px;
+  line-height: 24px;
+  background-color: #FDECEC;
+  color: #8A1C1C;
+}
+.login .login-wrap .content .auth-message.is-success {
+  background-color: #E8F5EC;
+  color: #0E5A2B;
 }
 .login .login-wrap .content .btn-submit {
   width: 100%;

@@ -18,7 +18,7 @@
 
 </head>
 
-<body class="body header-fixed">
+<body data-requires-auth class="body header-fixed">
 
     <div class="preload preload-container">
         <svg class="pl" width="240" height="240" viewBox="0 0 240 240">
@@ -78,7 +78,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="login.html">
+                            <a href="#" data-signout>
                                 <i class="icon-turn-off-1"></i>
                                 <span>Logout</span>
                             </a>
@@ -210,7 +210,7 @@
                                                       <li><a  href="#">Account</a></li>
                                                       <li><a  href="#">Setting</a></li>
                                                       <li><a  href="#">Support</a></li>
-                                                      <li><a  href="login.html">Logout</a></li>
+                                                      <li><a  href="#" data-signout>Logout</a></li>
                                                     </ul>
                                                 </div> 
                                                 <div class="mobile-nav-toggler mobile-button">
@@ -577,6 +577,13 @@
     <script src="app/js/map.js"></script>
     <script src="app/js/shortcodes.js"></script>
     <script src="app/js/main.js"></script>
+
+
+    <!-- pathika:auth -->
+    <script src="app/js/supabase.min.js"></script>
+    <script src="app/js/supabase-config.js"></script>
+    <script src="app/js/auth.js"></script>
+    <!-- /pathika:auth -->
 
 </body>
 

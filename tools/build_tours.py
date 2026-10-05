@@ -223,19 +223,6 @@ def header_html() -> str:
                                             </nav>
                                         </div>
                                         <div class="header-account flex align-center">
-                                            <div class="search-mobie relative">
-                                                <div class="dropdown">
-                                                    <a type="button" class="show-search" data-bs-toggle="dropdown" aria-expanded="false">
-                                                        <i class="icon-Vector5"></i>
-                                                    </a>
-                                                    <ul class="dropdown-menu top-search">
-                                                        <form action="/" id="search-bar-widget">
-                                                            <input type="text" placeholder="Search here...">
-                                                            <button type="button"><i class="icon-search-2"></i></button>
-                                                        </form>
-                                                    </ul>
-                                                </div>
-                                            </div>
                                             <div class="register">
                                                 <ul class="flex align-center">
                                                     <li class="">
@@ -1194,6 +1181,12 @@ HEADER_SELECT_RE = re.compile(
     re.DOTALL,
 )
 
+# The header search box never searched anything: <form action="/"> with a type="button" submit.
+HEADER_SEARCH_RE = re.compile(
+    r'[ \t]*<div class="search-mobie[^"]*">\s*<div class="dropdown">.*?</div>\s*</div>[ \t]*\n?',
+    re.DOTALL,
+)
+
 # Six repeats of the same placeholder logo, presented as partners.
 BRAND_LOGOS_RE = re.compile(
     r'\s*<section class="brand-logo-widget[^"]*">.*?</section>', re.DOTALL)
@@ -1250,6 +1243,7 @@ def patch_static_pages() -> int:
         updated = DESTINATION_NAV_RE.sub("", original)
         updated = BLOG_NAV_RE.sub(_news_item, updated)
         updated = HEADER_SELECT_RE.sub("", updated)
+        updated = HEADER_SEARCH_RE.sub("", updated)
         updated = BRAND_LOGOS_RE.sub("", updated)
         updated = updated.replace(HEADER_LOGO_OLD, HEADER_LOGO_NEW)
         updated = FLY_AB_RE.sub("", updated)

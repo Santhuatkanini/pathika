@@ -231,6 +231,38 @@ def patch_about(html: str) -> str:
     return html[:start] + block + html[end:]
 
 
+FOUNDER = ("Jaideep Zukti", "Founder")
+
+
+def _founder_portrait() -> str:
+    """The template's avata/10.jpg is a blank grey square; fall back to the logo mark."""
+    for ext in (".jpg", ".jpeg", ".png", ".webp"):
+        if (ROOT / "pathika" / "assets" / "images" / "avata" / f"founder{ext}").is_file():
+            return f"./assets/images/avata/founder{ext}"
+    return "./assets/images/favico.png"
+
+
+FOUNDER_PORTRAIT = _founder_portrait()
+
+# The template shipped the author's signature as an image (page/name.png).
+FOUNDER_RE = re.compile(
+    r'(<div class="content">\s*)'
+    r'(?:<img src="[^"]*name\.png"[^>]*>|<div class="name">.*?</div>)'
+    r'(\s*<span class="text-main">).*?(</span>)',
+    re.DOTALL,
+)
+
+FOUNDER_AVATAR_RE = re.compile(
+    r'(<div class="profile flex-three">\s*<div class="image">\s*<img src=")[^"]*(")')
+
+
+def patch_founder(html: str) -> str:
+    name, role = FOUNDER
+    html = FOUNDER_RE.sub(
+        f'\\g<1><div class="name">{name}</div>\\g<2>{role}\\g<3>', html, count=1)
+    return FOUNDER_AVATAR_RE.sub(f'\\g<1>{FOUNDER_PORTRAIT}\\g<2>', html, count=1)
+
+
 # --------------------------------------------------------------------------- tour tabs
 
 def home_card(tour: dict, delay: float) -> str:
@@ -767,6 +799,7 @@ def main() -> None:
     html = replace_section(html, '<section class="slider relative">', slider_section())
     html = patch_search_form(html)
     html = patch_about(html)
+    html = patch_founder(html)
     html = replace_section(html, '<section class="tour-package pd-main">', tour_package_section())
     html = replace_section(
         html, '<section class="relative tf-widget-activities pd-main overflow-hidden">',
