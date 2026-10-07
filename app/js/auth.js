@@ -245,19 +245,22 @@
             if (!session || list.querySelector('[data-account-menu]')) { return; }
 
             var account = document.createElement('li');
+            account.className = 'account-dropdown';
             account.setAttribute('data-account-menu', '');
+
             var link = document.createElement('a');
             link.href = ACCOUNT_HOME;
+            link.className = 'account-trigger';
             var icon = document.createElement('i');
             icon.className = 'icon-user-1-1';
             var label = document.createElement('span');
             label.textContent = firstName(session.user); // user-supplied: never innerHTML
             link.appendChild(icon);
             link.appendChild(label);
-            account.appendChild(link);
 
+            var submenu = document.createElement('ul');
+            submenu.className = 'account-submenu';
             var out = document.createElement('li');
-            out.setAttribute('data-account-menu', '');
             var outLink = document.createElement('a');
             outLink.href = '#';
             outLink.textContent = 'Log out';
@@ -266,10 +269,13 @@
                 signOut();
             });
             out.appendChild(outLink);
+            submenu.appendChild(out);
+
+            account.appendChild(link);
+            account.appendChild(submenu);
 
             if (signInItem) { signInItem.remove(); }
             list.appendChild(account);
-            list.appendChild(out);
         }
 
         sb.auth.getSession().then(function (res) { paint(res.data.session); });
