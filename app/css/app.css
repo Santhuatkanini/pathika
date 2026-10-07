@@ -1407,7 +1407,8 @@
   transition: all 300ms ease;
   z-index: 10;
 }
-.header-account .register ul li.account-dropdown:hover .account-submenu {
+.header-account .register ul li.account-dropdown:hover .account-submenu,
+.header-account .register ul li.account-dropdown.is-open .account-submenu {
   opacity: 1;
   visibility: visible;
   transform: translateY(5px);

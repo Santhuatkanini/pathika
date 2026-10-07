@@ -301,6 +301,33 @@
                 var dashboardItem = addItem('dashboard.html', 'Dashboard');
                 submenu.insertBefore(dashboardItem, submenu.lastElementChild);
             });
+
+            // :hover (below, in app.css) only ever fires with a mouse — on a touchscreen
+            // tapping the name just followed the link straight to My Booking, with no way
+            // to ever reach Log out. Toggle on click/tap instead; a modified click (new tab,
+            // new window, etc.) still behaves like a normal link.
+            link.setAttribute('aria-expanded', 'false');
+            link.addEventListener('click', function (event) {
+                if (event.button !== 0 || event.metaKey || event.ctrlKey ||
+                    event.shiftKey || event.altKey) {
+                    return;
+                }
+                event.preventDefault();
+                var isOpen = account.classList.toggle('is-open');
+                link.setAttribute('aria-expanded', String(isOpen));
+            });
+            document.addEventListener('click', function (event) {
+                if (!account.contains(event.target)) {
+                    account.classList.remove('is-open');
+                    link.setAttribute('aria-expanded', 'false');
+                }
+            });
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    account.classList.remove('is-open');
+                    link.setAttribute('aria-expanded', 'false');
+                }
+            });
         }
 
         sb.auth.getSession().then(function (res) { paint(res.data.session); });
