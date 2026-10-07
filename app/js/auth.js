@@ -66,6 +66,14 @@
         sb.auth.signOut().then(function () { location.href = HOME_PAGE; });
     }
 
+    /* ----- is this user allow-listed in the admins table? (see supabase/schema.sql) ----- */
+    function isAdmin(userId) {
+        return sb.from('admins').select('user_id').eq('user_id', userId)
+            .maybeSingle()
+            .then(function (res) { return !res.error && !!res.data; })
+            .catch(function () { return false; });
+    }
+
     /* ----- sign up ----- */
     function initSignUp() {
         var form = el('sign-up');
@@ -260,22 +268,39 @@
 
             var submenu = document.createElement('ul');
             submenu.className = 'account-submenu';
-            var out = document.createElement('li');
-            var outLink = document.createElement('a');
-            outLink.href = '#';
-            outLink.textContent = 'Log out';
-            outLink.addEventListener('click', function (event) {
-                event.preventDefault();
-                signOut();
-            });
-            out.appendChild(outLink);
-            submenu.appendChild(out);
+
+            function addItem(href, text, onClick) {
+                var li = document.createElement('li');
+                var a = document.createElement('a');
+                a.href = href;
+                a.textContent = text;
+                if (onClick) {
+                    a.addEventListener('click', function (event) {
+                        event.preventDefault();
+                        onClick();
+                    });
+                }
+                li.appendChild(a);
+                submenu.appendChild(li);
+                return li;
+            }
+
+            addItem('my-booking.html', 'My Booking');
+            addItem('my-profile.html', 'My Profile');
+            addItem('#', 'Log out', signOut);
 
             account.appendChild(link);
             account.appendChild(submenu);
 
             if (signInItem) { signInItem.remove(); }
             list.appendChild(account);
+
+            // Admins get a quick link to the dashboard too, ahead of Log out.
+            isAdmin(session.user.id).then(function (admin) {
+                if (!admin) { return; }
+                var dashboardItem = addItem('dashboard.html', 'Dashboard');
+                submenu.insertBefore(dashboardItem, submenu.lastElementChild);
+            });
         }
 
         sb.auth.getSession().then(function (res) { paint(res.data.session); });
@@ -290,6 +315,27 @@
             if (res.data.session) { return; }
             var here = location.pathname.split('/').pop() || ACCOUNT_HOME;
             location.replace(LOGIN_PAGE + '?next=' + encodeURIComponent(here));
+        });
+    }
+
+    /* ----- keep non-admins off the dashboard/listing/add-tour pages -----
+     * A signed-out visitor is sent to login (like initGuard); a signed-in customer
+     * who just isn't an admin is bounced to their bookings instead, not login — they
+     * don't need to sign in again, they just don't have access to this page.
+     */
+    function initAdminGuard() {
+        if (!document.body.hasAttribute('data-requires-admin') || !sb) { return; }
+
+        sb.auth.getSession().then(function (res) {
+            var session = res.data.session;
+            if (!session) {
+                var here = location.pathname.split('/').pop() || ACCOUNT_HOME;
+                location.replace(LOGIN_PAGE + '?next=' + encodeURIComponent(here));
+                return;
+            }
+            isAdmin(session.user.id).then(function (admin) {
+                if (!admin) { location.replace(ACCOUNT_HOME); }
+            });
         });
     }
 
@@ -427,6 +473,7 @@
         initGoogle();
         initHeader();
         initGuard();
+        initAdminGuard();
         initBookings();
         initSignedInRedirect();
     }

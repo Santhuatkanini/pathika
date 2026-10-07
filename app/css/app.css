@@ -1373,9 +1373,10 @@
 .header-top .header-top-wrap .header-top-right ul li {
   white-space: nowrap;
 }
-/* Account menu (auth.js): Log out lives in a hover dropdown off the name, matching
-   the main nav's .dropdown2 look (white panel, scaleY-in) rather than the template's
-   single plain "Sign in" link this slot originally shipped with. */
+/* Account menu (auth.js): My Booking / My Profile / (Dashboard, admins only) / Log out
+   live in a hover dropdown off the name, matching the main nav's .dropdown2 look
+   (white panel, scaleY-in) rather than the template's single plain "Sign in" link
+   this slot originally shipped with. */
 .header-account .register ul li.account-dropdown {
   position: relative;
 }
@@ -1394,7 +1395,7 @@
   position: absolute;
   top: 100%;
   right: 0;
-  width: 150px;
+  width: 170px;
   padding: 10px 0;
   border-radius: 6px;
   background-color: #FFFFFF;

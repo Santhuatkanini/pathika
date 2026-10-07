@@ -2,7 +2,8 @@
 
 Idempotent — re-run after adding pages. What it does:
   * injects the three auth <script> tags before </body> on every page
-  * marks the signed-in-only pages with data-requires-auth
+  * marks customer pages with data-requires-auth and admin pages with
+    data-requires-admin (see supabase/schema.sql for the admins allow-list)
   * turns the dead "Logout" links (href="login.html") into real sign-out buttons
   * regenerates reset-password.html from login.html
 
@@ -18,14 +19,19 @@ from pathlib import Path
 
 SITE = Path(__file__).resolve().parent.parent
 
-# Pages only a signed-in visitor should reach.
+# Pages any signed-in customer should reach.
 PROTECTED = [
-    "add-tour.html",
-    "dashboard.html",
     "my-booking.html",
     "my-favorite.html",
-    "my-listing.html",
     "my-profile.html",
+]
+
+# Pages only an allow-listed admin should reach (customers get bounced to
+# my-booking.html — see initAdminGuard() in app/js/auth.js).
+ADMIN_PROTECTED = [
+    "add-tour.html",
+    "dashboard.html",
+    "my-listing.html",
 ]
 
 SCRIPTS = """    <!-- pathika:auth -->
@@ -52,10 +58,16 @@ def inject_scripts(html: str) -> str:
     return html.replace("</body>", SCRIPTS + "\n</body>", 1)
 
 
-def mark_protected(html: str) -> str:
-    if "data-requires-auth" in html:
-        return html
-    return re.sub(r"<body\b", "<body data-requires-auth", html, count=1)
+BODY_TAG_RE = re.compile(r"<body([^>]*)>")
+
+
+def mark_body(html: str, attr: str) -> str:
+    """Set exactly one data-requires-* marker, replacing any stale one from a
+    previous run (a page can move between PROTECTED and ADMIN_PROTECTED)."""
+    def repl(match: re.Match) -> str:
+        attrs = re.sub(r"\s*data-requires-(?:auth|admin)\b", "", match.group(1))
+        return f"<body {attr}{attrs}>"
+    return BODY_TAG_RE.sub(repl, html, count=1)
 
 
 def wire_logout(html: str) -> str:
@@ -135,7 +147,10 @@ def main() -> None:
         original = page.read_text(encoding="utf-8")
         html = inject_scripts(original)
         if page.name in PROTECTED:
-            html = mark_protected(html)
+            html = mark_body(html, "data-requires-auth")
+            html = wire_logout(html)
+        elif page.name in ADMIN_PROTECTED:
+            html = mark_body(html, "data-requires-admin")
             html = wire_logout(html)
         if html != original:
             page.write_text(html, encoding="utf-8")
