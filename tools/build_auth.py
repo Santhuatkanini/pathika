@@ -49,6 +49,27 @@ SCRIPTS_RE = re.compile(
 LOGOUT_LINK_RE = re.compile(r'<a(\s+)href="login\.html">(\s*)(<i class="icon-turn-off-1">)')
 LOGOUT_ITEM_RE = re.compile(r'<a(\s+)href="login\.html">Logout</a>')
 
+# The sidebar on every account page (sidebar-dashboard .db-menu) lists all six pages
+# regardless of role; the three admin-only links don't belong on customer pages.
+SIDEBAR_ADMIN_ITEM_RE = re.compile(
+    r'[ \t]*<li>\s*<a href="(?:dashboard|my-listing|add-tour)\.html">\s*'
+    r'<i[^>]*></i>\s*<span>[^<]*</span>\s*</a>\s*</li>\n?'
+)
+
+# The template's sidebar "My Profile" item links to my-favorite.html by mistake.
+MY_PROFILE_HREF_RE = re.compile(
+    r'(<a href=")my-favorite(\.html">\s*<i class="icon-profile-user-1"></i>'
+    r'\s*<span>My Profile</span>)'
+)
+
+
+def trim_customer_sidebar(html: str) -> str:
+    return SIDEBAR_ADMIN_ITEM_RE.sub("", html)
+
+
+def fix_my_profile_link(html: str) -> str:
+    return MY_PROFILE_HREF_RE.sub(r"\1my-profile\2", html)
+
 
 def inject_scripts(html: str) -> str:
     # Replace in place when already present, so surrounding whitespace is preserved
@@ -146,9 +167,11 @@ def main() -> None:
     for page in sorted(SITE.glob("*.html")):
         original = page.read_text(encoding="utf-8")
         html = inject_scripts(original)
+        html = fix_my_profile_link(html)
         if page.name in PROTECTED:
             html = mark_body(html, "data-requires-auth")
             html = wire_logout(html)
+            html = trim_customer_sidebar(html)
         elif page.name in ADMIN_PROTECTED:
             html = mark_body(html, "data-requires-admin")
             html = wire_logout(html)

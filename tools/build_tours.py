@@ -97,16 +97,6 @@ def nav(active: str) -> str:
         {TOURS_SUBMENU}
     </li>
     <li><a href="blog.html">News</a></li>
-    <li class="dropdown2"><a href="#">Dashboard</a>
-        <ul>
-            <li><a href="dashboard.html">Dashboard</a></li>
-            <li><a href="my-booking.html">My booking</a></li>
-            <li><a href="my-listing.html">My Listing</a></li>
-            <li><a href="add-tour.html">Add Tour</a></li>
-            <li><a href="my-favorite.html">My Favorites</a></li>
-            <li><a href="my-profile.html">My profile</a></li>
-        </ul>
-    </li>
     <li><a href="contact-us.html">Contact</a></li>
     <li class="dropdown2"><a href="#">More</a>
         <ul>
@@ -1162,6 +1152,14 @@ DESTINATION_NAV_RE = re.compile(
     re.DOTALL,
 )
 
+# Account pages: now reached from the header-account dropdown (auth.js), which
+# already shows the right items for a customer vs. an admin. This public, always-
+# visible copy leaked Dashboard/My Listing/Add Tour to every visitor, signed in or not.
+DASHBOARD_NAV_RE = re.compile(
+    r'\s*<li class="dropdown2[^"]*">\s*<a href="#">Dashboard</a>\s*<ul>.*?</ul>\s*</li>',
+    re.DOTALL,
+)
+
 BLOG_NAV_RE = re.compile(
     r'<li class="dropdown2([^"]*)">\s*<a href="[^"]*">Blog</a>\s*<ul>.*?</ul>\s*</li>',
     re.DOTALL,
@@ -1246,6 +1244,7 @@ def patch_static_pages() -> int:
             continue
         original = path.read_text(encoding="utf-8")
         updated = DESTINATION_NAV_RE.sub("", original)
+        updated = DASHBOARD_NAV_RE.sub("", updated)
         updated = BLOG_NAV_RE.sub(_news_item, updated)
         updated = HEADER_SELECT_RE.sub("", updated)
         updated = HEADER_SEARCH_RE.sub("", updated)
