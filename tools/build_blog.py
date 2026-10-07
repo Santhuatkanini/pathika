@@ -27,8 +27,8 @@ from pathlib import Path
 from tours_data import CONTACT, TOURS
 
 ROOT = Path(__file__).resolve().parent.parent
-BLOG = ROOT / "pathika" / "blog.html"
-PHOTO_DIR = ROOT / "pathika" / "assets" / "images" / "tours"
+BLOG = ROOT / "blog.html"
+PHOTO_DIR = ROOT / "assets" / "images" / "tours"
 
 FEEDS = [
     ("Karnataka treks", "Karnataka trek OR trekking"),

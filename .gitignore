@@ -1,3 +1,3 @@
-pathika/app/js/map-config.js
+app/js/map-config.js
 *.pyc
 .venv

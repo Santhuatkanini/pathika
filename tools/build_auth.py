@@ -16,7 +16,7 @@ build_contact -> build_auth.
 import re
 from pathlib import Path
 
-SITE = Path(__file__).resolve().parent.parent / "pathika"
+SITE = Path(__file__).resolve().parent.parent
 
 # Pages only a signed-in visitor should reach.
 PROTECTED = [

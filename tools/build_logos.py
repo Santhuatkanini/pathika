@@ -14,8 +14,8 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parent.parent
-BRAND = ROOT / "pathika" / "assets" / "images" / "brand"
-IMAGES = ROOT / "pathika" / "assets" / "images"
+BRAND = ROOT / "assets" / "images" / "brand"
+IMAGES = ROOT / "assets" / "images"
 
 LOGO_WIDTH = 420  # rendered at 128px, so this stays crisp on 3x screens
 FAVICON = 180

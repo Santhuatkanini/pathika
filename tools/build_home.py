@@ -17,7 +17,7 @@ from pathlib import Path
 from tours_data import CATEGORIES, CONTACT, TOURS, photo
 
 ROOT = Path(__file__).resolve().parent.parent
-INDEX = ROOT / "pathika" / "index.html"
+INDEX = ROOT / "index.html"
 
 HUB_PAGE = "tours.html"
 WHATSAPP_URL = f"https://wa.me/{CONTACT['phone_intl']}"
@@ -237,7 +237,7 @@ FOUNDER = ("Jaideep Zukti", "Founder")
 def _founder_portrait() -> str:
     """The template's avata/10.jpg is a blank grey square; fall back to the logo mark."""
     for ext in (".jpg", ".jpeg", ".png", ".webp"):
-        if (ROOT / "pathika" / "assets" / "images" / "avata" / f"founder{ext}").is_file():
+        if (ROOT / "assets" / "images" / "avata" / f"founder{ext}").is_file():
             return f"./assets/images/avata/founder{ext}"
     return "./assets/images/favico.png"
 

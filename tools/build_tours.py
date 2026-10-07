@@ -31,11 +31,17 @@ from tours_data import (
 )
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT_DIR = ROOT / "pathika"
+OUT_DIR = ROOT
 
 HUB_PAGE = "tours.html"
 WHATSAPP_URL = f"https://wa.me/{CONTACT['phone_intl']}"
 MAIL_URL = f"mailto:{CONTACT['email']}"
+
+COPYRIGHT_HTML = (
+    '<p class="copy-right">Copyright &copy; Pathika. All Rights Reserved '
+    '&nbsp;|&nbsp; <a href="privacy-policy.html">Privacy Policy</a> '
+    '&nbsp;|&nbsp; <a href="terms-condition.html">Terms &amp; Condition</a></p>'
+)
 
 CATEGORY_BY_SLUG = {c["slug"]: c for c in CATEGORIES}
 
@@ -390,7 +396,7 @@ def footer_html() -> str:
 
                     <div class="row footer-bottom">
                         <div class="col-md-6">
-                            <p class="copy-right">Copyright &copy; Pathika. All Rights Reserved</p>
+                            {COPYRIGHT_HTML}
                         </div>
                         <div class="col-md-6">
                             <ul class="social flex-six">
@@ -1126,8 +1132,7 @@ CONTACT_RE_SWAPS = [
                 r"for crypto collectibles and non-fungible", re.DOTALL),
      "Just like that, we are on our way to everywhere\n"
      "                                to enliven, enrich and inspire your adventure."),
-    (re.compile(r'<p class="copy-right">.*?</p>', re.DOTALL),
-     '<p class="copy-right">Copyright &copy; Pathika. All Rights Reserved</p>'),
+    (re.compile(r'<p class="copy-right">.*?</p>', re.DOTALL), COPYRIGHT_HTML),
 ]
 
 

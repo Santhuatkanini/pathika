@@ -11,7 +11,7 @@ stock image, so the site never ends up with broken images.
 
 from pathlib import Path
 
-PHOTO_DIR = Path(__file__).resolve().parent.parent / "pathika" / "assets" / "images" / "tours"
+PHOTO_DIR = Path(__file__).resolve().parent.parent / "assets" / "images" / "tours"
 PHOTO_EXTS = (".jpg", ".jpeg", ".png", ".webp")
 
 

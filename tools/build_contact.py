@@ -15,7 +15,7 @@ from pathlib import Path
 from tours_data import CONTACT, PICKUP_POINTS
 
 ROOT = Path(__file__).resolve().parent.parent
-PAGE = ROOT / "pathika" / "contact-us.html"
+PAGE = ROOT / "contact-us.html"
 
 WHATSAPP_URL = f"https://wa.me/{CONTACT['phone_intl']}"
 
