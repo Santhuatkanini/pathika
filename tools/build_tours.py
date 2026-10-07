@@ -10,6 +10,7 @@ and refreshes the "Tours" dropdown in the shared navigation of every page.
 
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
@@ -457,6 +458,7 @@ def page_tail() -> str:
     <script src="app/js/map.js"></script>
     <script src="app/js/shortcodes.js"></script>
     <script src="app/js/main.js"></script>
+    <script src="app/js/dynamic-tours.js"></script>
 
 </body>
 
@@ -960,6 +962,15 @@ def render_detail(tour: dict) -> str:
         + f"""
                 <section class="tour-single pd-main">
                     <div class="tf-container">
+                        <div class="row mb-20">
+                            <div class="col-lg-12 text-end">
+                                <button type="button" class="btn-submit" data-favourite-toggle
+                                    data-tour-slug="{tour['slug']}" data-tour-name="{tour['heading']}"
+                                    style="width:auto; padding:10px 24px;">
+                                    &#9734; Save to favourites
+                                </button>
+                            </div>
+                        </div>
                         <div class="row">
                             <div class="col-lg-12">
                                 <ul class="nav justify-content-between tab-tour-single" id="pills-tab" role="tablist">
@@ -1008,7 +1019,7 @@ def render_category(cat: dict) -> str:
                                 <p class="des">{cat['blurb']}</p>
                             </div>
                         </div>
-                        <div class="row">
+                        <div class="row" data-category="{cat['slug']}">
 {cards}
                         </div>
                     </div>
@@ -1038,7 +1049,7 @@ def render_hub() -> str:
                                 <p class="des">{cat['blurb']}</p>
                             </div>
                         </div>
-                        <div class="row">
+                        <div class="row" data-category="{cat['slug']}">
 {cards}
                         </div>
                     </div>
@@ -1326,6 +1337,29 @@ def patch_gallery_page() -> bool:
 
 # --------------------------------------------------------------------------- main
 
+MANIFEST_PATH = ROOT / "assets" / "data" / "tours-manifest.json"
+
+
+def write_manifest() -> None:
+    """A small JSON list of the 14 static tours, for admin.js (dashboard/my-listing
+    stats, which need to join bookings against tours client-side). The tours
+    themselves stay static HTML — this is just an index of what already exists.
+    """
+    manifest = [
+        {
+            "slug": t["slug"],
+            "name": t["name"],
+            "category": t["category"],
+            "image": t["image"],
+            "page": detail_page(t),
+            "static": True,
+        }
+        for t in TOURS
+    ]
+    MANIFEST_PATH.parent.mkdir(parents=True, exist_ok=True)
+    MANIFEST_PATH.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+
+
 def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     written = []
@@ -1347,6 +1381,7 @@ def main() -> None:
     navs = patch_static_pages()
     gallery = patch_gallery_page()
     about = patch_about_page()
+    write_manifest()
 
     print(f"Wrote {len(written)} pages into {OUT_DIR}:")
     for name in written:
@@ -1356,6 +1391,7 @@ def main() -> None:
     print(f"Patched the shared nav in {navs} existing pages.")
     print(f"Patched gallery.html: {gallery}")
     print(f"Patched about-us.html: {about}")
+    print(f"Wrote tours manifest: {MANIFEST_PATH}")
 
 
 if __name__ == "__main__":

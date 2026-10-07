@@ -45,6 +45,16 @@ SCRIPTS_RE = re.compile(
     r"[ \t]*<!-- pathika:auth -->.*?<!-- /pathika:auth -->\n", re.DOTALL
 )
 
+# Dashboard / My Listing / Add Tour only.
+ADMIN_SCRIPT = """    <!-- pathika:admin -->
+    <script src="app/js/admin.js"></script>
+    <!-- /pathika:admin -->
+"""
+
+ADMIN_SCRIPT_RE = re.compile(
+    r"[ \t]*<!-- pathika:admin -->.*?<!-- /pathika:admin -->\n", re.DOTALL
+)
+
 # Both shapes of dead logout link on the account pages.
 LOGOUT_LINK_RE = re.compile(r'<a(\s+)href="login\.html">(\s*)(<i class="icon-turn-off-1">)')
 LOGOUT_ITEM_RE = re.compile(r'<a(\s+)href="login\.html">Logout</a>')
@@ -77,6 +87,14 @@ def inject_scripts(html: str) -> str:
     if SCRIPTS_RE.search(html):
         return SCRIPTS_RE.sub(SCRIPTS, html)
     return html.replace("</body>", SCRIPTS + "\n</body>", 1)
+
+
+def inject_admin_script(html: str) -> str:
+    if ADMIN_SCRIPT_RE.search(html):
+        return ADMIN_SCRIPT_RE.sub(ADMIN_SCRIPT, html)
+    # Goes right after the shared auth scripts, so admin.js can rely on `sb` existing.
+    marker = "<!-- /pathika:auth -->\n"
+    return html.replace(marker, marker + ADMIN_SCRIPT, 1)
 
 
 BODY_TAG_RE = re.compile(r"<body([^>]*)>")
@@ -175,6 +193,7 @@ def main() -> None:
         elif page.name in ADMIN_PROTECTED:
             html = mark_body(html, "data-requires-admin")
             html = wire_logout(html)
+            html = inject_admin_script(html)
         if html != original:
             page.write_text(html, encoding="utf-8")
             print(f"  patched {page.name}")

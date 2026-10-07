@@ -1423,6 +1423,17 @@
 .header-account .register ul li.account-dropdown .account-submenu li a:hover {
   color: #4DA528;
 }
+/* Reusable inline form feedback (add-tour.html etc.) outside the login card, where
+   .auth-message's styling doesn't reach. */
+.form-message {
+  margin-bottom: 20px;
+  padding: 12px 15px;
+  border-radius: 6px;
+  font-size: 15px;
+  line-height: 24px;
+  background-color: #FDECEC;
+  color: #8A1C1C;
+}
 .header-top .header-top-wrap .header-top-right ul li:not(:last-child) {
   margin-right: 26px;
 }

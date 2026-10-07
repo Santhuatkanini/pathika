@@ -1,0 +1,114 @@
+[
+  {
+    "slug": "kodachadri",
+    "name": "Kodachadri",
+    "category": "western-ghat-treks",
+    "image": "./assets/images/tours/kodachadri.jpg",
+    "page": "tour-kodachadri.html",
+    "static": true
+  },
+  {
+    "slug": "bandajje",
+    "name": "Bandajje Arbi",
+    "category": "western-ghat-treks",
+    "image": "./assets/images/tours/bandajje.jpg",
+    "page": "tour-bandajje.html",
+    "static": true
+  },
+  {
+    "slug": "kudremukha",
+    "name": "Kudremukha",
+    "category": "western-ghat-treks",
+    "image": "./assets/images/tours/kudremukha.jpg",
+    "page": "tour-kudremukha.html",
+    "static": true
+  },
+  {
+    "slug": "kurinjal",
+    "name": "Kurinjal",
+    "category": "western-ghat-treks",
+    "image": "./assets/images/tours/kurinjal.jpg",
+    "page": "tour-kurinjal.html",
+    "static": true
+  },
+  {
+    "slug": "gangadikal",
+    "name": "Gangadikal",
+    "category": "western-ghat-treks",
+    "image": "./assets/images/tours/gangadikal.jpg",
+    "page": "tour-gangadikal.html",
+    "static": true
+  },
+  {
+    "slug": "merthi-gudda",
+    "name": "Merthi Gudda",
+    "category": "western-ghat-treks",
+    "image": "./assets/images/tours/merthi-gudda.jpg",
+    "page": "tour-merthi-gudda.html",
+    "static": true
+  },
+  {
+    "slug": "karushi-gudda",
+    "name": "Karushi Gudda",
+    "category": "western-ghat-treks",
+    "image": "./assets/images/tours/karushi-gudda.jpg",
+    "page": "tour-karushi-gudda.html",
+    "static": true
+  },
+  {
+    "slug": "dudhsagar",
+    "name": "Dudhsagar",
+    "category": "western-ghat-treks",
+    "image": "./assets/images/tours/dudhsagar.jpg",
+    "page": "tour-dudhsagar.html",
+    "static": true
+  },
+  {
+    "slug": "gokarna",
+    "name": "Gokarna",
+    "category": "coastal-treks",
+    "image": "./assets/images/tours/gokarna.jpg",
+    "page": "tour-gokarna.html",
+    "static": true
+  },
+  {
+    "slug": "netrani",
+    "name": "Netrani Island",
+    "category": "coastal-treks",
+    "image": "./assets/images/tours/netrani.jpg",
+    "page": "tour-netrani.html",
+    "static": true
+  },
+  {
+    "slug": "dandeli",
+    "name": "Dandeli",
+    "category": "coastal-treks",
+    "image": "./assets/images/tours/dandeli.jpg",
+    "page": "tour-dandeli.html",
+    "static": true
+  },
+  {
+    "slug": "chennarayanadurga",
+    "name": "Chennarayana Durga",
+    "category": "day-treks",
+    "image": "./assets/images/tours/chennarayanadurga.jpg",
+    "page": "tour-chennarayanadurga.html",
+    "static": true
+  },
+  {
+    "slug": "rajasthan",
+    "name": "Rajasthan",
+    "category": "backpacking-tours",
+    "image": "./assets/images/tours/rajasthan.jpg",
+    "page": "tour-rajasthan.html",
+    "static": true
+  },
+  {
+    "slug": "spiti",
+    "name": "Spiti Valley",
+    "category": "backpacking-tours",
+    "image": "./assets/images/tours/spiti.jpg",
+    "page": "tour-spiti.html",
+    "static": true
+  }
+]

@@ -18,6 +18,10 @@
         ? window.supabase.createClient(cfg.url, cfg.anonKey)
         : null;
 
+    // Shared with app/js/admin.js, so the admin pages reuse this same client
+    // instead of creating a second one (Supabase warns about duplicate clients).
+    window.PATHIKA_SB = sb;
+
     var NOT_SET_UP = 'Accounts are not connected yet. Add your Supabase project ' +
         'details to app/js/supabase-config.js.';
 
@@ -476,6 +480,144 @@
         });
     }
 
+    /* ----- favourites: save button (static tour pages + tour-view.html) and the
+     * my-favorite.html list. favourites only stores (user_id, tour_slug) — the name
+     * for display comes from whichever page already knows it (the save button) or,
+     * on my-favorite.html, from the static manifest + the public tours table.
+     */
+    function wireFavouriteButton(button) {
+        if (!sb) { return; }
+        var slug = button.dataset.tourSlug;
+        var saved = false;
+
+        function paint() {
+            button.textContent = saved ? '\u2605 Saved to favourites' : '\u2606 Save to favourites';
+        }
+
+        sb.auth.getSession().then(function (res) {
+            var session = res.data.session;
+            if (!session) { return; }
+            return sb.from('favourites').select('tour_slug')
+                .eq('user_id', session.user.id).eq('tour_slug', slug).maybeSingle();
+        }).then(function (result) {
+            if (result && result.data) { saved = true; paint(); }
+        });
+
+        button.addEventListener('click', function () {
+            sb.auth.getSession().then(function (res) {
+                var session = res.data.session;
+                if (!session) {
+                    var here = location.pathname.split('/').pop() + location.search;
+                    location.href = LOGIN_PAGE + '?next=' + encodeURIComponent(here);
+                    return;
+                }
+                button.disabled = true;
+                var change = saved
+                    ? sb.from('favourites').delete()
+                        .eq('user_id', session.user.id).eq('tour_slug', slug)
+                    : sb.from('favourites').insert({ user_id: session.user.id, tour_slug: slug });
+                change.then(function (result) {
+                    button.disabled = false;
+                    if (result.error) { return; }
+                    saved = !saved;
+                    paint();
+                });
+            });
+        });
+    }
+
+    // Exposed so tour-view.js can wire a button it creates after an async fetch,
+    // once it already knows the tour's slug/name — this function runs before that.
+    window.PATHIKA_WIRE_FAVOURITE = wireFavouriteButton;
+
+    function initFavouriteButtons() {
+        document.querySelectorAll('[data-favourite-toggle]').forEach(wireFavouriteButton);
+    }
+
+    function favouriteCard(tour) {
+        var card = document.createElement('div');
+        card.className = 'tour-listing box-sd';
+
+        var imageLink = document.createElement('a');
+        imageLink.href = tour.page;
+        imageLink.className = 'tour-listing-image';
+        var img = document.createElement('img');
+        img.src = tour.image;
+        img.alt = '';
+        imageLink.appendChild(img);
+
+        var content = document.createElement('div');
+        content.className = 'tour-listing-content';
+        var title = document.createElement('h3');
+        title.className = 'title-tour-list';
+        var titleLink = document.createElement('a');
+        titleLink.href = tour.page;
+        titleLink.textContent = tour.name;
+        title.appendChild(titleLink);
+        content.appendChild(title);
+
+        var removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn-submit';
+        removeBtn.style.width = 'auto';
+        removeBtn.style.padding = '8px 18px';
+        removeBtn.textContent = 'Remove';
+        removeBtn.addEventListener('click', function () {
+            sb.auth.getSession().then(function (res) {
+                var session = res.data.session;
+                if (!session) { return; }
+                return sb.from('favourites').delete()
+                    .eq('user_id', session.user.id).eq('tour_slug', tour.slug);
+            }).then(function () { card.remove(); });
+        });
+        content.appendChild(removeBtn);
+
+        card.appendChild(imageLink);
+        card.appendChild(content);
+        return card;
+    }
+
+    function initFavouritesGrid() {
+        var grid = el('favourites-grid');
+        if (!grid || !sb) { return; }
+
+        sb.auth.getSession().then(function (res) {
+            var session = res.data.session;
+            if (!session) { return; }
+            return Promise.all([
+                fetch('assets/data/tours-manifest.json').then(function (r) { return r.json(); }),
+                sb.from('tours').select('slug,title,image_path'),
+                sb.from('favourites').select('tour_slug').eq('user_id', session.user.id)
+            ]);
+        }).then(function (results) {
+            grid.replaceChildren();
+            if (!results) { return; }
+
+            var byTours = {};
+            results[0].forEach(function (t) {
+                byTours[t.slug] = { slug: t.slug, name: t.name, image: t.image, page: t.page };
+            });
+            (results[1].data || []).forEach(function (t) {
+                byTours[t.slug] = {
+                    slug: t.slug, name: t.title,
+                    image: t.image_path || 'assets/images/favico.png',
+                    page: 'tour-view.html?slug=' + encodeURIComponent(t.slug)
+                };
+            });
+
+            var saved = (results[2].data || []).map(function (f) { return byTours[f.tour_slug]; })
+                .filter(Boolean);
+
+            if (!saved.length) {
+                var p = document.createElement('p');
+                p.textContent = 'Nothing saved yet \u2014 look for "Save to favourites" on a trek page.';
+                grid.appendChild(p);
+                return;
+            }
+            saved.forEach(function (tour) { grid.appendChild(favouriteCard(tour)); });
+        });
+    }
+
     /* ----- never show a sign-in form to someone who is already signed in -----
      * Confirmation and OAuth links land back on login.html carrying a session in the
      * URL fragment, which would otherwise leave the visitor staring at a login form.
@@ -502,6 +644,8 @@
         initGuard();
         initAdminGuard();
         initBookings();
+        initFavouriteButtons();
+        initFavouritesGrid();
         initSignedInRedirect();
     }
 
