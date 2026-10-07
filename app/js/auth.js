@@ -287,6 +287,116 @@
         });
     }
 
+    /* ----- my-booking.html: real bookings, or an honest empty state -----
+     * bookings only has a SELECT policy (see supabase/schema.sql) — rows are created
+     * by hand in the Supabase dashboard, so most new accounts will see none yet.
+     */
+    function formatDate(value) {
+        if (!value) { return 'To be scheduled'; }
+        return new Date(value + 'T00:00:00').toLocaleDateString('en-IN', {
+            day: '2-digit', month: 'short', year: 'numeric'
+        });
+    }
+
+    function formatPrice(amount) {
+        if (amount === null || amount === undefined) { return ''; }
+        return new Intl.NumberFormat('en-IN', {
+            style: 'currency', currency: 'INR', maximumFractionDigits: 0
+        }).format(amount);
+    }
+
+    function bookingRow(booking) {
+        var li = document.createElement('li');
+        li.className = 'flex-three';
+
+        var main = document.createElement('div');
+        main.className = 'booking-list flex-three';
+        var image = document.createElement('div');
+        image.className = 'image';
+        var img = document.createElement('img');
+        img.src = 'assets/images/favico.png';
+        img.alt = '';
+        image.appendChild(img);
+        var content = document.createElement('div');
+        content.className = 'content';
+        var title = document.createElement('h6');
+        title.className = 'title-booking';
+        title.textContent = booking.tour_name; // from the dashboard, never user-supplied
+        content.appendChild(title);
+        var price = formatPrice(booking.amount_inr);
+        if (price) {
+            var priceEl = document.createElement('p');
+            priceEl.className = 'price';
+            priceEl.textContent = price;
+            content.appendChild(priceEl);
+        }
+        main.appendChild(image);
+        main.appendChild(content);
+
+        var status = document.createElement('div');
+        status.className = 'booking-list-table';
+        var statusText = document.createElement('p');
+        statusText.className = 'status';
+        statusText.textContent = booking.status.charAt(0).toUpperCase() + booking.status.slice(1);
+        status.appendChild(statusText);
+
+        var date = document.createElement('div');
+        date.className = 'booking-list-table';
+        var dateText = document.createElement('p');
+        dateText.className = 'date-gues';
+        dateText.textContent = formatDate(booking.trek_date);
+        date.appendChild(dateText);
+
+        var guests = document.createElement('div');
+        guests.className = 'booking-list-table';
+        var guestsText = document.createElement('p');
+        guestsText.className = 'date-gues';
+        guestsText.textContent = booking.guests + (booking.guests === 1 ? ' Guest' : ' Guests');
+        guests.appendChild(guestsText);
+
+        li.appendChild(main);
+        li.appendChild(status);
+        li.appendChild(date);
+        li.appendChild(guests);
+        return li;
+    }
+
+    function emptyBookingsRow(text) {
+        var li = document.createElement('li');
+        li.className = 'flex-three';
+        var p = document.createElement('p');
+        p.textContent = text;
+        li.appendChild(p);
+        return li;
+    }
+
+    function initBookings() {
+        var list = el('booking-table-content');
+        if (!list || !sb) { return; }
+
+        sb.auth.getSession().then(function (res) {
+            var session = res.data.session;
+            if (!session) { return; }
+            return sb.from('bookings')
+                .select('tour_name,trek_date,guests,status,amount_inr')
+                .eq('user_id', session.user.id)
+                .order('trek_date', { ascending: false });
+        }).then(function (result) {
+            if (!result) { return; }
+            list.replaceChildren();
+            if (result.error) {
+                list.appendChild(emptyBookingsRow('Could not load your bookings right now.'));
+                return;
+            }
+            if (!result.data.length) {
+                list.appendChild(emptyBookingsRow(
+                    'No bookings yet — message us on WhatsApp to plan your first trek.'));
+                return;
+            }
+            result.data.forEach(function (booking) { list.appendChild(bookingRow(booking)); });
+        });
+    }
+
     /* ----- never show a sign-in form to someone who is already signed in -----
      * Confirmation and OAuth links land back on login.html carrying a session in the
      * URL fragment, which would otherwise leave the visitor staring at a login form.
@@ -311,6 +421,7 @@
         initGoogle();
         initHeader();
         initGuard();
+        initBookings();
         initSignedInRedirect();
     }
 
