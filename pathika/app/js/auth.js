@@ -236,10 +236,16 @@
         var list = document.querySelector('.header-account .register ul');
         if (!list || !sb) { return; }
 
+        // Tour pages put the "Enquire" WhatsApp button here instead of a sign-in link.
+        // Replace a sign-in link, but keep anything else — Enquire is the main CTA.
+        var signInLink = list.querySelector('a[href="login.html"]');
+        var signInItem = signInLink ? signInLink.closest('li') : null;
+
         function paint(session) {
-            if (!session) { return; }
+            if (!session || list.querySelector('[data-account-menu]')) { return; }
 
             var account = document.createElement('li');
+            account.setAttribute('data-account-menu', '');
             var link = document.createElement('a');
             link.href = ACCOUNT_HOME;
             var icon = document.createElement('i');
@@ -251,6 +257,7 @@
             account.appendChild(link);
 
             var out = document.createElement('li');
+            out.setAttribute('data-account-menu', '');
             var outLink = document.createElement('a');
             outLink.href = '#';
             outLink.textContent = 'Log out';
@@ -260,7 +267,9 @@
             });
             out.appendChild(outLink);
 
-            list.replaceChildren(account, out);
+            if (signInItem) { signInItem.remove(); }
+            list.appendChild(account);
+            list.appendChild(out);
         }
 
         sb.auth.getSession().then(function (res) { paint(res.data.session); });
