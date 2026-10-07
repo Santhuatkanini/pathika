@@ -287,6 +287,20 @@
         });
     }
 
+    /* ----- never show a sign-in form to someone who is already signed in -----
+     * Confirmation and OAuth links land back on login.html carrying a session in the
+     * URL fragment, which would otherwise leave the visitor staring at a login form.
+     */
+    function initSignedInRedirect() {
+        if (!sb || (!el('login') && !el('sign-up'))) { return; }
+
+        function leave(session) {
+            if (session) { location.replace(nextPage()); }
+        }
+        sb.auth.getSession().then(function (res) { leave(res.data.session); });
+        sb.auth.onAuthStateChange(function (_event, session) { leave(session); });
+    }
+
     function init() {
         if (configured && !window.supabase) {
             console.error('Pathika: app/js/supabase.min.js failed to load.');
@@ -297,6 +311,7 @@
         initGoogle();
         initHeader();
         initGuard();
+        initSignedInRedirect();
     }
 
     if (document.readyState === 'loading') {
