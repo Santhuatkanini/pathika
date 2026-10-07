@@ -1373,6 +1373,11 @@
 .header-top .header-top-wrap .header-top-right ul li {
   white-space: nowrap;
 }
+/* Account menu (auth.js): the template only ever shipped a single "Sign in" li here,
+   so the list never needed spacing between items. */
+.header-account .register ul li[data-account-menu] {
+  margin-left: 20px;
+}
 .header-top .header-top-wrap .header-top-right ul li:not(:last-child) {
   margin-right: 26px;
 }
